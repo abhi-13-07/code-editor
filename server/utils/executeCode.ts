@@ -45,9 +45,11 @@ const executeCode = async (
       (code: number | null, signal: NodeJS.Signals | null, time: number) => {
         const response = JSON.stringify({
           eventname: "exit",
-          code,
-          signal,
-          time,
+          data: JSON.stringify({
+            code,
+            signal,
+            time,
+          }),
         });
         socket.send(response);
         processMap.remove(socket.socketId);
