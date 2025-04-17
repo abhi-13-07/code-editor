@@ -7,3 +7,8 @@ interface ILanguage {
   value: string;
   ext: string;
 }
+
+interface IServerEvent {
+  eventname: "stdout" | "stderr" | "exit";
+  data: string;
+}

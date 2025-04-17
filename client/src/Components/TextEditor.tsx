@@ -3,6 +3,7 @@ import * as monaco from "monaco-editor";
 import SUPPORTED_LANGUAGE from "../Constants/supportedLanguages";
 import getBoilerPlateCode from "../utils/getBoilerPlateCode";
 import getFilename from "../utils/getFilename";
+import { useIDE } from "../Context/IDEProvider";
 
 const FONT_SIZES = [14, 16, 18, 20];
 
@@ -10,7 +11,9 @@ type MonacoEditorInstance = monaco.editor.IStandaloneCodeEditor | null;
 type MonacoEditorTheme = "dark" | "light";
 
 const TextEditor = () => {
-  const editorRef = useRef<HTMLDivElement>(null);
+  const { isRunning, runCode } = useIDE();
+
+  const editorElementRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<MonacoEditorTheme>("dark");
   const [fontSize, setFontSize] = useState<number>(14);
   const [langIndex, setLangIndex] = useState<number>(0);
@@ -20,9 +23,9 @@ const TextEditor = () => {
   const filename = getFilename(language);
 
   useEffect(() => {
-    if (!editorRef.current) return;
+    if (!editorElementRef.current) return;
 
-    const e = monaco.editor.create(editorRef.current, {
+    const e = monaco.editor.create(editorElementRef.current, {
       language: language.value,
       value: getBoilerPlateCode(language),
       theme: "vs-dark",
@@ -63,7 +66,12 @@ const TextEditor = () => {
   };
 
   const handleRun = () => {
-    //
+    if (!editor) return;
+
+    const model = editor.getModel()!;
+    const code = model.getValue();
+
+    runCode(language.value, code, filename);
   };
 
   return (
@@ -114,12 +122,18 @@ const TextEditor = () => {
           </div>
         </div>
         <div>
-          <button className="btn btn-lg btn-success" onClick={handleRun}>
-            Run
-          </button>
+          {!isRunning ? (
+            <button className="btn btn-lg btn-success" onClick={handleRun}>
+              Run
+            </button>
+          ) : (
+            <button className="btn btn-lg btn-danger" onClick={handleRun}>
+              Stop
+            </button>
+          )}
         </div>
       </div>
-      <div className="editor" ref={editorRef}></div>
+      <div className="editor" ref={editorElementRef}></div>
     </div>
   );
 };

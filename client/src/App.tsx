@@ -1,6 +1,7 @@
 import "./App.css";
 import TerminalWindow from "./Components/TerminalWindow";
 import TextEditor from "./Components/TextEditor";
+import { IDEProvider } from "./Context/IDEProvider";
 
 const App = () => {
   return (
@@ -9,8 +10,10 @@ const App = () => {
         <h1>Awesome Code Editor</h1>
       </header> */}
       <main className="main">
-        <TextEditor />
-        <TerminalWindow />
+        <IDEProvider>
+          <TextEditor />
+          <TerminalWindow />
+        </IDEProvider>
       </main>
     </div>
   );

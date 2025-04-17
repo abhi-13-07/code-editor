@@ -76,6 +76,12 @@ body {
   border-radius: 5px;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn-lg {
   height: 35px;
   width: 100px;
@@ -91,7 +97,19 @@ body {
 }
 
 .btn-success:hover {
-  background-color: #4ba744;
+  background-color: #459b3f;
+  border: 1px solid #459b3f;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+  transition: ease-in 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #be3d4a;
 }
 
 .btn-outline-danger {
