@@ -32,12 +32,18 @@ const executeCode = async (
 
     codeRunner.on("stdout", (data: string) => {
       const response = JSON.stringify({ eventname: "stdout", data });
-      socket.send(response);
+
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(response);
+      }
     });
 
     codeRunner.on("stderr", (data: string) => {
       const response = JSON.stringify({ eventname: "stderr", data });
-      socket.send(response);
+
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(response);
+      }
     });
 
     codeRunner.on(
@@ -51,7 +57,11 @@ const executeCode = async (
             time,
           }),
         });
-        socket.send(response);
+
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(response);
+        }
+
         processMap.remove(socket.socketId);
       }
     );

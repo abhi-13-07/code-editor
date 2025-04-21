@@ -23,6 +23,7 @@ const processMap = ProcessMap.getInstance();
 wss.on("connection", (socket: WebSocket) => {
   const socketId = uuidV4();
   socket.socketId = socketId;
+  socket.isAlive = true;
 
   socket.on("message", (data: RawData) => {
     const message = JSON.parse(data.toString());
@@ -52,6 +53,10 @@ wss.on("connection", (socket: WebSocket) => {
         codeRunner.terminate();
 
         return;
+      case "pong":
+        socket.isAlive = true;
+        return;
+
       default:
         socket.send("Invalid event");
     }
@@ -60,13 +65,35 @@ wss.on("connection", (socket: WebSocket) => {
   socket.on("close", function () {
     const socket = this as WebSocket;
 
-    const childProcess = processMap.get(socket.socketId);
+    const codeRunner = processMap.get(socket.socketId);
 
-    if (childProcess) {
-      processMap.remove(socket.socketId);
-      childProcess.terminate();
+    if (codeRunner) {
+      codeRunner.terminate();
     }
   });
+});
+
+const pingClients = (client: WebSocket) => {
+  if (!client.isAlive) {
+    const codeRunner = processMap.get(client.socketId);
+
+    if (codeRunner) {
+      codeRunner.terminate();
+    }
+  } else {
+    client.isAlive = false;
+    client.send(JSON.stringify({ eventname: "ping" }));
+  }
+};
+
+const interval = setInterval(() => {
+  wss.clients.forEach((client) => {
+    pingClients(client as WebSocket);
+  });
+}, 30000);
+
+wss.on("close", () => {
+  clearInterval(interval);
 });
 
 console.log("Server started on port 5000");
