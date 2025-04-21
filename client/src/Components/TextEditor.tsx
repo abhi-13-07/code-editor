@@ -11,7 +11,7 @@ type MonacoEditorInstance = monaco.editor.IStandaloneCodeEditor | null;
 type MonacoEditorTheme = "dark" | "light";
 
 const TextEditor = () => {
-  const { isRunning, runCode } = useIDE();
+  const { isRunning, runCode, stopExecution } = useIDE();
 
   const editorElementRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<MonacoEditorTheme>("dark");
@@ -74,6 +74,10 @@ const TextEditor = () => {
     runCode(language.value, code, filename);
   };
 
+  const handleStop = () => {
+    stopExecution();
+  };
+
   return (
     <div className={`bg-${theme} editor-container`}>
       <div className={`bg-${theme} editor-utils`}>
@@ -127,7 +131,7 @@ const TextEditor = () => {
               Run
             </button>
           ) : (
-            <button className="btn btn-lg btn-danger" onClick={handleRun}>
+            <button className="btn btn-lg btn-danger" onClick={handleStop}>
               Stop
             </button>
           )}

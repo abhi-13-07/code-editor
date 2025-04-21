@@ -15,6 +15,7 @@ interface IDEProviderType {
   terminalRef: React.RefObject<Terminal | null>;
   runCode: (language: string, code: string, filename: string) => void;
   clearTerminal: () => void;
+  stopExecution: () => void;
 }
 
 const IDEContext = createContext<IDEProviderType>({} as IDEProviderType);
@@ -64,9 +65,14 @@ export const IDEProvider = ({ children }: PropsWithChildren) => {
     ws.send(payload);
   };
 
+  const stopExecution = () => {
+    if (!ws) return;
+    ws.send(JSON.stringify({ eventname: "terminate" }));
+  };
+
   return (
     <IDEContext.Provider
-      value={{ isRunning, terminalRef, runCode, clearTerminal }}
+      value={{ isRunning, terminalRef, runCode, clearTerminal, stopExecution }}
     >
       {children}
     </IDEContext.Provider>
