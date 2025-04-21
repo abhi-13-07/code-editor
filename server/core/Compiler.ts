@@ -3,7 +3,7 @@ import { compilerBinaries } from "../constants/compilerBinaries";
 import getFileName from "../utils/getFilename";
 import { rm } from "fs/promises";
 import Timer from "../utils/Timer";
-import createChildProcess from "./createChildProcess";
+import spwanChildProcess from "./spwanChildProcess";
 import { ChildProcess } from "child_process";
 
 class Compiler extends CodeRunner {
@@ -20,14 +20,15 @@ class Compiler extends CodeRunner {
   }
 
   private compile(): void {
-    const bin = compilerBinaries[this.getLang()];
-    let compileCommand = `${bin} ${this.getSourceFile()}`;
+    const command = compilerBinaries[this.getLang()];
+    const args = [this.getSourceFile()];
 
     if (this.getLang() === "cpp" || this.getLang() === "c") {
-      compileCommand += ` -o ${this.filename}.exe`;
+      args.push("-o");
+      args.push(this.filename + ".exe");
     }
 
-    const child = createChildProcess(compileCommand, this.cwd);
+    const child = spwanChildProcess(command, args, this.cwd);
     this.compilerProcess = child;
 
     child.stderr?.on("data", (data) => {
@@ -55,15 +56,15 @@ class Compiler extends CodeRunner {
     });
 
     this.on("compilation_success", () => {
-      let executeCommand = this.filename + ".exe";
+      let command = this.filename + ".exe";
+      const args = [];
 
       if (this.getLang() === "java") {
-        executeCommand = `${process.env.JAVA_BIN_PATH!} ${
-          this.filename.split(".")[0]
-        }`;
+        command = `${process.env.JAVA_BIN_PATH!}`;
+        args.push(this.filename.split(".")[0]);
       }
 
-      const child = createChildProcess(executeCommand, this.cwd);
+      const child = spwanChildProcess(command, args, this.cwd);
 
       this.setChild(child);
 
@@ -71,17 +72,20 @@ class Compiler extends CodeRunner {
         this.timer.start();
       });
 
-      child.stdout?.on("data", (data) => {
-        this.emit("stdout", data);
+      child.stdout?.on("data", (data: Buffer) => {
+        this.emit("stdout", data.toString());
       });
 
-      child.stderr?.on("data", (data) => {
-        this.emit("stderr", data);
+      child.stderr?.on("data", (data: Buffer) => {
+        this.emit("stderr", data.toString());
       });
 
       child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
         this.timer.stop();
         this.emit("exit", code, signal, this.timer.getElapsedTime());
+      });
+
+      child.on("close", () => {
         rm(this.cwd, { recursive: true });
       });
     });

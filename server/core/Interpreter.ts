@@ -1,9 +1,8 @@
+import { rm } from "fs/promises";
 import CodeRunner from "./CodeRunner";
 import { interpreterBinaries } from "../constants/compilerBinaries";
 import Timer from "../utils/Timer";
-import createChildProcess from "./createChildProcess";
-import path from "path";
-import { rm, rmdir } from "fs/promises";
+import spawnChildProcess from "./spwanChildProcess";
 
 class Interpreter extends CodeRunner {
   private timer: Timer;
@@ -14,11 +13,10 @@ class Interpreter extends CodeRunner {
   }
 
   public async execute(): Promise<void> {
-    const executeCommand = `${
-      interpreterBinaries[this.getLang()]
-    } ${this.getSourceFile()}`;
+    const command = interpreterBinaries[this.getLang()];
+    const args = [this.getSourceFile()];
 
-    const child = createChildProcess(executeCommand, this.cwd);
+    const child = spawnChildProcess(command, args, this.cwd);
 
     this.setChild(child);
 
@@ -26,17 +24,20 @@ class Interpreter extends CodeRunner {
       this.timer.start();
     });
 
-    child?.stdout?.on("data", (data) => {
-      this.emit("stdout", data);
+    child?.stdout?.on("data", (data: Buffer) => {
+      this.emit("stdout", data.toString());
     });
 
-    child.stderr?.on("data", (data) => {
-      this.emit("stderr", data);
+    child.stderr?.on("data", (data: Buffer) => {
+      this.emit("stderr", data.toString());
     });
 
     child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
       this.timer.stop();
       this.emit("exit", code, signal, this.timer.getElapsedTime());
+    });
+
+    child.on("close", () => {
       rm(this.cwd, { recursive: true });
     });
   }
