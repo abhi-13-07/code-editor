@@ -65,7 +65,7 @@ const TerminalWindow = () => {
           "\r\n\r\n\x1b[1;90m" +
             `Completed in ${exitInfo.time}ms.\r\nProcess exited with code ${exitInfo.code}`
         );
-      } else {
+      } else if (parsedMessage.eventname === "stdout") {
         terminalRef.current?.write(parsedMessage.data);
       }
     };

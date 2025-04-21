@@ -9,6 +9,6 @@ interface ILanguage {
 }
 
 interface IServerEvent {
-  eventname: "stdout" | "stderr" | "exit";
+  eventname: "stdout" | "stderr" | "exit" | "ping";
   data: string;
 }
