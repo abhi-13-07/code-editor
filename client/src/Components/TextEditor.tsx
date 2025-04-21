@@ -4,6 +4,7 @@ import SUPPORTED_LANGUAGE from "../Constants/supportedLanguages";
 import getBoilerPlateCode from "../utils/getBoilerPlateCode";
 import getFilename from "../utils/getFilename";
 import { useIDE } from "../Context/IDEProvider";
+import useLocalStorage from "../hooks/useLocalStorage";
 
 const FONT_SIZES = [14, 16, 18, 20];
 
@@ -14,10 +15,10 @@ const TextEditor = () => {
   const { isRunning, runCode, stopExecution } = useIDE();
 
   const editorElementRef = useRef<HTMLDivElement>(null);
-  const [theme, setTheme] = useState<MonacoEditorTheme>("dark");
-  const [fontSize, setFontSize] = useState<number>(14);
-  const [langIndex, setLangIndex] = useState<number>(0);
   const [editor, setEditor] = useState<MonacoEditorInstance>(null);
+  const [fontSize, setFontSize] = useLocalStorage<number>("font-size", 14);
+  const [langIndex, setLangIndex] = useLocalStorage<number>("lang-idx", 0);
+  const [theme, setTheme] = useLocalStorage<MonacoEditorTheme>("theme", "dark");
 
   const language = SUPPORTED_LANGUAGE[langIndex];
   const filename = getFilename(language);
