@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import * as monaco from "monaco-editor";
 import SUPPORTED_LANGUAGE from "../Constants/supportedLanguages";
 import getBoilerPlateCode from "../utils/getBoilerPlateCode";
 import getFilename from "../utils/getFilename";
 import { useIDE } from "../Context/IDEProvider";
 import useLocalStorage from "../hooks/useLocalStorage";
+import useWindowResize from "../hooks/useWindowResize";
 
 const FONT_SIZES = [14, 16, 18, 20];
 
@@ -50,6 +51,13 @@ const TextEditor = () => {
       theme: `vs-${theme}`,
     });
   }, [editor, fontSize, theme]);
+
+  const resizeHandler = useCallback(() => {
+    if (!editor) return;
+    editor.layout();
+  }, [editor]);
+
+  useWindowResize(resizeHandler);
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.target;

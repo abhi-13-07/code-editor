@@ -1,10 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
 import { useIDE } from "../Context/IDEProvider";
 import { useWebSocket } from "../Context/SocketProvider";
 import "@xterm/xterm/css/xterm.css";
+import useWindowResize from "../hooks/useWindowResize";
 
 type OnKeyEvent = { key: string; domEvent: KeyboardEvent };
+
+const fitAddon = new FitAddon();
 
 const TerminalWindow = () => {
   const { terminalRef, isRunning, clearTerminal } = useIDE();
@@ -17,9 +21,13 @@ const TerminalWindow = () => {
 
     const term = new Terminal();
 
+    term.loadAddon(fitAddon);
+
     terminalRef.current = term;
 
     term.open(terminalElementRef.current);
+
+    fitAddon.fit();
 
     term.onKey(({ key, domEvent }: OnKeyEvent) => {
       if (domEvent.code === "Backspace") {
@@ -76,6 +84,12 @@ const TerminalWindow = () => {
       ws.removeEventListener("message", handleMessage);
     };
   }, [terminalRef, ws]);
+
+  const resizeHandler = useCallback(() => {
+    fitAddon.fit();
+  }, []);
+
+  useWindowResize(resizeHandler);
 
   return (
     <div className="terminal-container">
