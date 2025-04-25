@@ -1,4 +1,5 @@
 import { WebSocketServer, RawData, WebSocket } from "ws";
+import http from "http";
 import { v4 as uuidV4 } from "uuid";
 import { config } from "dotenv";
 
@@ -8,6 +9,9 @@ if (process.env.NODE_ENV !== "production") {
 
 import executeCode from "./utils/executeCode";
 import ProcessMap from "./utils/ProcessMap";
+import Stream from "stream";
+import connectToDB from "./db/connectToDB";
+import requestHandlers from "./requestHandlers";
 
 declare module "ws" {
   interface WebSocket {
@@ -16,7 +20,23 @@ declare module "ws" {
   }
 }
 
-const wss = new WebSocketServer({ port: parseInt(process.env.PORT!) });
+const PORT = parseInt(process.env.PORT!);
+
+const server = http.createServer(requestHandlers);
+
+// handle HTTP upgrade
+server.on(
+  "upgrade",
+  (request: http.IncomingMessage, socket: Stream.Duplex, head: Buffer) => {
+    if (request.url === "/") {
+      wss.handleUpgrade(request, socket, head, (client) => {
+        wss.emit("connection", client);
+      });
+    }
+  }
+);
+
+const wss = new WebSocketServer({ noServer: true });
 
 const processMap = ProcessMap.getInstance();
 
@@ -55,8 +75,8 @@ wss.on("connection", (socket: WebSocket) => {
         return;
       case "pong":
         socket.isAlive = true;
-        return;
 
+        return;
       default:
         socket.send("Invalid event");
     }
@@ -96,4 +116,7 @@ wss.on("close", () => {
   clearInterval(interval);
 });
 
-console.log("Server started on port 5000");
+server.listen(PORT, () => {
+  console.log("Server started on port 5000");
+  connectToDB();
+});
