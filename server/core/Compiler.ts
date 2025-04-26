@@ -31,8 +31,8 @@ class Compiler extends CodeRunner {
     const child = spwanChildProcess(command, args, this.cwd);
     this.compilerProcess = child;
 
-    child.stderr?.on("data", (data) => {
-      this.emit("compilation_error", data);
+    child.stderr?.on("data", (data: Buffer) => {
+      this.emit("compilation_error", data.toString());
     });
 
     child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
