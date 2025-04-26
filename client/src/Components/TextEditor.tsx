@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as monaco from "monaco-editor";
+
 import SUPPORTED_LANGUAGE from "../Constants/supportedLanguages";
 import getBoilerPlateCode from "../utils/getBoilerPlateCode";
 import getFilename from "../utils/getFilename";
@@ -7,15 +8,21 @@ import { useIDE } from "../Context/IDEProvider";
 import useLocalStorage from "../hooks/useLocalStorage";
 import useWindowResize from "../hooks/useWindowResize";
 
+interface Props {
+  lang: number;
+  code: string;
+}
+
 const FONT_SIZES = [14, 16, 18, 20];
 
 type MonacoEditorInstance = monaco.editor.IStandaloneCodeEditor | null;
 type MonacoEditorTheme = "dark" | "light";
 
-const TextEditor = () => {
+const TextEditor = ({ lang, code }: Props) => {
   const { isRunning, runCode, stopExecution } = useIDE();
 
   const editorElementRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [editor, setEditor] = useState<MonacoEditorInstance>(null);
   const [fontSize, setFontSize] = useLocalStorage<number>("font-size", 14);
   const [langIndex, setLangIndex] = useLocalStorage<number>("lang-idx", 0);
@@ -25,11 +32,16 @@ const TextEditor = () => {
   const filename = getFilename(language);
 
   useEffect(() => {
+    if (!lang || lang < 0) return;
+    setLangIndex(lang);
+  }, [lang, setLangIndex]);
+
+  useEffect(() => {
     if (!editorElementRef.current) return;
 
     const e = monaco.editor.create(editorElementRef.current, {
       language: language.value,
-      value: getBoilerPlateCode(language),
+      value: code || getBoilerPlateCode(language),
       theme: "vs-dark",
       tabSize: 4,
       fontSize: 14,
@@ -41,7 +53,7 @@ const TextEditor = () => {
     return () => {
       e.dispose();
     };
-  }, [language]);
+  }, [language, lang, code]);
 
   useEffect(() => {
     if (!editor) return;
@@ -83,6 +95,33 @@ const TextEditor = () => {
     runCode(language.value, code, filename);
   };
 
+  const handleShare = async () => {
+    setLoading(true);
+    try {
+      const model = editor?.getModel();
+      const code = model?.getValue();
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ lang: langIndex, code }),
+      });
+
+      if (res.status === 201) {
+        const data = await res.json();
+        await navigator.clipboard.writeText(data.link);
+        alert("URL Copied to clipboard.");
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong please try again later");
+    }
+
+    setLoading(false);
+  };
+
   const handleStop = () => {
     stopExecution();
   };
@@ -98,7 +137,7 @@ const TextEditor = () => {
             <label htmlFor="language-selector">Language: </label>
             <select
               id="language-selector"
-              defaultValue={langIndex}
+              value={langIndex}
               onChange={handleLanguageChange}
             >
               {SUPPORTED_LANGUAGE.map((lang, idx) => (
@@ -135,6 +174,15 @@ const TextEditor = () => {
           </div>
         </div>
         <div>
+          {lang < 0 && (
+            <button
+              className="btn btn-lg btn-outline"
+              onClick={handleShare}
+              disabled={loading}
+            >
+              {loading ? "Hold on.." : "Share"}
+            </button>
+          )}
           {!isRunning ? (
             <button className="btn btn-lg btn-success" onClick={handleRun}>
               Run

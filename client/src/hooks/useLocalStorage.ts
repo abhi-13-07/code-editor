@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 const useLocalStorage = <T>(
   key: string,
@@ -9,10 +9,13 @@ const useLocalStorage = <T>(
     return item ? JSON.parse(item) : initialValue;
   });
 
-  const setValue = (value: T) => {
-    setStoredValue(value);
-    window.localStorage.setItem(key, JSON.stringify(value));
-  };
+  const setValue = useCallback(
+    (value: T) => {
+      window.localStorage.setItem(key, JSON.stringify(value));
+      setStoredValue(value);
+    },
+    [key]
+  );
 
   return [storedValue, setValue];
 };
