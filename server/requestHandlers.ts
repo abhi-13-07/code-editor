@@ -6,6 +6,15 @@ const requestHandlers = async (
   res: http.ServerResponse
 ) => {
   res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL!);
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    res.setHeader("Content-Length", 0);
+    res.end("");
+    return;
+  }
 
   if (req.url === "/share" && req.method === "POST") {
     let raw = "";
@@ -15,11 +24,11 @@ const requestHandlers = async (
     });
 
     req.on("end", async () => {
-      const body = JSON.parse(raw);
+      const body = JSON.parse(raw) as { lang: number; code: string };
       const { lang, code } = body;
 
       const codeSnippet = new CodeSnippet({
-        language: lang,
+        languageId: lang,
         code,
       });
 
@@ -27,6 +36,7 @@ const requestHandlers = async (
         const newSnippet = await codeSnippet.save();
 
         res.statusCode = 201;
+        res.setHeader("Content-Type", "application/json");
         res.end(
           JSON.stringify({
             message: "Successfully Created",
@@ -40,7 +50,6 @@ const requestHandlers = async (
     });
   } else if (req.method === "GET") {
     const id = req.url?.split("/").at(-1);
-    console.log(id);
 
     try {
       const codeSnippet = await CodeSnippet.findById(id);

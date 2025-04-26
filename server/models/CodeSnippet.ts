@@ -1,17 +1,24 @@
 import mongoose from "mongoose";
 
-const codeSnippetSchema = new mongoose.Schema(
+interface ICodeSnippet {
+  languageId: number;
+  code: string;
+}
+
+const codeSnippetSchema = new mongoose.Schema<ICodeSnippet>(
   {
-    language: {
-      type: String,
+    languageId: {
+      type: Number,
+      required: true,
       trim: true,
     },
     code: {
       type: String,
+      required: true,
       trim: true,
     },
   },
   { toJSON: { virtuals: true }, timestamps: true }
 );
 
-export default mongoose.model("CodeSnippet", codeSnippetSchema);
+export default mongoose.model<ICodeSnippet>("CodeSnippet", codeSnippetSchema);
