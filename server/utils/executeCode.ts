@@ -49,14 +49,19 @@ const executeCode = async (
     codeRunner.on(
       "exit",
       (code: number | null, signal: NodeJS.Signals | null, time: number) => {
-        const response = JSON.stringify({
-          eventname: "exit",
-          data: JSON.stringify({
-            code,
-            signal,
-            time,
-          }),
-        });
+        let response = null;
+
+        if (signal === "SIGTERM") {
+          response = JSON.stringify({
+            eventname: "exit",
+            data: "process terminated\r\n",
+          });
+        } else {
+          response = JSON.stringify({
+            eventname: "exit",
+            data: `Completed in ${time}ms.\r\nProcess exited with code ${code}`,
+          });
+        }
 
         if (socket.readyState === WebSocket.OPEN) {
           socket.send(response);

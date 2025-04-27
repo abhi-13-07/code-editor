@@ -67,12 +67,9 @@ const TerminalWindow = () => {
       if (parsedMessage.eventname === "stderr") {
         terminalRef.current?.write("\x1b[5;31m" + parsedMessage.data);
       } else if (parsedMessage.eventname === "exit") {
-        const exitInfo = JSON.parse(parsedMessage.data);
+        // const exitInfo = JSON.parse(parsedMessage.data);
 
-        terminalRef.current?.write(
-          "\r\n\r\n\x1b[1;90m" +
-            `Completed in ${exitInfo.time}ms.\r\nProcess exited with code ${exitInfo.code}`
-        );
+        terminalRef.current?.write("\r\n\r\n\x1b[1;90m" + parsedMessage.data);
       } else if (parsedMessage.eventname === "stdout") {
         terminalRef.current?.write(parsedMessage.data);
       }
