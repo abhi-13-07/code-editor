@@ -15,7 +15,6 @@ class Compiler extends CodeRunner {
     super(lang, sourceFile, cwd);
     this.filename = getFileName(this.getSourceFile()).split(".")[0];
     this.timer = new Timer();
-    this.cwd = cwd;
     this.compilerProcess = null;
   }
 
@@ -40,17 +39,15 @@ class Compiler extends CodeRunner {
 
       if (code === 0) {
         this.emit("compilation_success");
+        rm(this.getSourceFile());
       } else {
         this.emit("exit", code, signal, 0);
+        rm(this.cwd, { recursive: true });
       }
-
-      rm(this.getSourceFile());
     });
   }
 
   public async execute(): Promise<void> {
-    this.compile();
-
     this.on("compilation_error", (data: string) => {
       this.emit("stderr", data);
     });
@@ -89,6 +86,8 @@ class Compiler extends CodeRunner {
         rm(this.cwd, { recursive: true });
       });
     });
+
+    this.compile();
   }
 
   public terminate(code?: number): void {
