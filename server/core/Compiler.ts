@@ -48,6 +48,9 @@ class Compiler extends CodeRunner {
   }
 
   public async execute(): Promise<void> {
+    // comiple code first
+    this.compile();
+
     this.on("compilation_error", (data: string) => {
       this.emit("stderr", data);
     });
@@ -86,8 +89,6 @@ class Compiler extends CodeRunner {
         rm(this.cwd, { recursive: true });
       });
     });
-
-    this.compile();
   }
 
   public terminate(code?: number): void {

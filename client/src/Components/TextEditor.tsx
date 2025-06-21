@@ -36,6 +36,31 @@ const TextEditor = ({ lang, code }: Props) => {
     setLangIndex(lang);
   }, [lang, setLangIndex]);
 
+  // useEffect(() => {
+  //   if (!editorElementRef.current) return;
+
+  //   const editorElement = editorElementRef.current;
+
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.ctrlKey && e.key === "s") {
+  //       e.preventDefault();
+  //     } else if (e.ctrlKey && e.key === "Enter") {
+  //       if (!editor) return;
+
+  //       const model = editor.getModel()!;
+  //       const code = model.getValue()!;
+
+  //       runCode(language.value, code, filename);
+  //     }
+  //   };
+
+  //   editorElement.addEventListener("keydown", handleKeyDown);
+
+  //   return () => {
+  //     editorElement.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, [runCode, language.value, filename, editor]);
+
   useEffect(() => {
     if (!editorElementRef.current) return;
 
