@@ -3,7 +3,7 @@ import { compilerBinaries } from "../constants/compilerBinaries";
 import getFileName from "../utils/getFilename";
 import { rm } from "fs/promises";
 import Timer from "../utils/Timer";
-import spwanChildProcess from "./spwanChildProcess";
+import spwanChildProcess from "./spawnChildProcess";
 import { ChildProcess } from "child_process";
 
 class Compiler extends CodeRunner {
