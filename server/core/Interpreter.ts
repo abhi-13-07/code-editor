@@ -2,7 +2,7 @@ import { rm } from "fs/promises";
 import CodeRunner from "./CodeRunner";
 import { interpreterBinaries } from "../constants/compilerBinaries";
 import Timer from "../utils/Timer";
-import spawnChildProcess from "./spwanChildProcess";
+import spawnChildProcess from "./spawnChildProcess";
 
 class Interpreter extends CodeRunner {
   private timer: Timer;
