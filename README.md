@@ -1,4 +1,4 @@
-# 🖥️ Code Jam
+# 🖥️ Code Editor
 
 Online code editor (playground) with multiple language support.
 
@@ -30,7 +30,7 @@ Online code editor (playground) with multiple language support.
 
 ### 🎥 Video Demo
 
-📺 [watch CodeJam demo video](https://youtu.be/KjGkgmkbZ4Q)
+📺 [watch Code Editor demo video](https://youtu.be/KjGkgmkbZ4Q)
 
 ### 📦 Local setup
 
