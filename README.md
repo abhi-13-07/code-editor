@@ -37,7 +37,7 @@ Online code editor (playground) with multiple language support.
 Clone this repository
 
 ```shell
-git clone https://github.com/abhi-13-07/codejam.git
+git clone https://github.com/abhi-13-07/code-editor.git
 cd codejam
 ```
 
